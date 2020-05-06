@@ -3,6 +3,7 @@ import glob
 import re
 import difflib
 
+print("*begins screeching*")
 client = discord.Client()
 
 @client.event
@@ -28,12 +29,11 @@ async def listmemes(message):
     for memefileschunk in chunks:
         mememessage = "\n".join(memefileschunk)
         await message.author.send(mememessage)
-    await message.channel.send("Boi i have slid into your dms with a list of memes")
+    await message.channel.send("boi i have slid into your dms prepare to be destroyed")
 
 def findmemes(query, numresults):
     memefiles = getmemefiles()
     matches = [k for k in memefiles if query in k]
-    print(matches)
     return matches[:numresults]
 
 async def handlesearch(message):
@@ -46,9 +46,32 @@ async def handlesearch(message):
         searchmessage = "\n".join(matches)
         await message.channel.send("bruh are you lookin for ```" + searchmessage + "```")
 
+async def handleplay(message):
+    query = message.content[len("##play "):]
+    meme = findmemes(query, 1)[0]
+    if(meme == []):
+        await message.channel.send("no meme bruh")
+    else:
+        memepath = "/home/pepesilvia/mememachine/muh_sounds_bruh/" + meme + ".flac"
+        await message.channel.send("i wanna play " + memepath)
+
+async def handlehelp(message):
+    helpmessage = [""]
+    helpmessage.append("_\"My guess is that you've been confused for a very long time.\"_")
+    helpmessage.append("bruh heres what i can do:")
+    helpmessage.append("`##play meme`       plays the first meme that exactly matche")
+    helpmessage.append("`##search meme`     shows the first 25 memes that exactly match")
+    helpmessage.append("`##help`            prints this message")
+    helpmessage.append("`##list`            dont")
+    await message.channel.send("\n".join(helpmessage))
+
 async def handlemessage(message):
+    if message.content.startswith("##play"):
+        await handleplay(message)
     if message.content.startswith("##search"):
         await handlesearch(message)
+    if message.content.startswith("##help"):
+        await handlehelp(message)
     if message.content.startswith('##list'):
         await listmemes(message)
 
