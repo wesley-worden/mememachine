@@ -1,6 +1,7 @@
 import discord
 import glob
 import re
+import difflib
 
 client = discord.Client()
 
@@ -21,18 +22,33 @@ def getmemefiles():
 async def listmemes(message):
     await message.author.send("Here are the available memes:")
     memefiles = getmemefiles()
-    #print(memefiles)
     #split into chunks
     chunksize = 50
     chunks = [memefiles[i:i + chunksize] for i in range(0, len(memefiles), chunksize)]
-    #print(chunks)
     for memefileschunk in chunks:
         mememessage = "\n".join(memefileschunk)
         await message.author.send(mememessage)
     await message.channel.send("Boi i have slid into your dms with a list of memes")
 
+def findmemes(query, numresults):
+    memefiles = getmemefiles()
+    matches = [k for k in memefiles if query in k]
+    print(matches)
+    return matches[:numresults]
+
+async def handlesearch(message):
+    query = message.content[len("##search "):]
+    matches = findmemes(query, 25)
+    if(matches == []):
+        await message.channel.send("no sounds bruh")
+    else:
+        matches.insert(0, "")
+        searchmessage = "\n".join(matches)
+        await message.channel.send("bruh are you lookin for ```" + searchmessage + "```")
 
 async def handlemessage(message):
+    if message.content.startswith("##search"):
+        await handlesearch(message)
     if message.content.startswith('##list'):
         await listmemes(message)
 
@@ -43,9 +59,6 @@ async def on_message(message):
 
     if message.content.startswith('##'):
         await handlemessage(message)
-
-    if message.content.startswith("$hello"):
-        await message.channel.send("goodbye.")
 
 api_key_file = open("api-key","r")
 api_key = api_key_file.readline()
