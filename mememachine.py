@@ -1,9 +1,20 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
+from discord import FFmpegPCMAudio
+from discord.utils import get
 import os
 import glob
+#import signal
+#import sys
 
+#please shrek, we pray to you, watch over this bot
+#let him play the memes for our bretheren and their defenenders,
+#and to kill this bot if he betrays your legacy or his master
+#def shrek_wrangler(shrek_is_love, shrek_is_life):
+#    print("damn bruh giving me the hard Ctrl+C")
+#    sys.exit(0)
+#signal.signal(signal.SIGINT, shrek_wrangler)
 #commonly used values
 prefix = "##"
 #status = "potatoe.exe"
@@ -27,7 +38,7 @@ def getmemefiles():
             file = file[:-(len(".flac"))]
             memefiles.append(file)
     memefiles.sort()
-    return memefiles 
+    return memefiles
 
 #async def messagehim(text):
 #    await bot.send_message(discord.Object(id=
@@ -61,9 +72,13 @@ async def play(context, *args):
         await message.channel.send("bruh i need a meme to play")
         return
     meme = args[0]
+    #make sure we can access voice
+    if not message.author.voice:
+        await message.channel.send("bruh i am too dumb to access the voice channel because we are in the DMs, use #meme-machine in rowdys")
+        return
     #check if they are in a voice channel first
-    voice_channel=user.voice.voice_channel
-    if(voice_channel == None):
+    channel = context.message.author.voice.channel
+    if(channel == None):
         await message.channel.send("bruh you gotta be in a voice channel first")
         return
     #find the meme
@@ -73,16 +88,16 @@ async def play(context, *args):
         return
     memepath = "/home/pepesilvia/mememachine/muh_sounds_bruh/" + meme + ".flac"
     #await message.channel.send("i wanna play " + memepath)
-    #create StreamPlayer
-    vc = await bot.join_voice_channel(voice_channel)
-    player = vc.create_ffmpeg_player(memepath, after=lambda: print("done playing " + memepath))
+    #switch voice channels if needed
+    voice = get(bot.voice_clients, guild=context.guild)
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
     print("playing " + memepath)
-    player.start()
-    while not player.is_done():
-        await asyncio.sleep(1)
+    source = FFmpegPCMAudio(memepath)
+    player = voice.play(source)
     #disconnect when done
-    player.stop()
-    await vc.disconnect
 
 @bot.command(brief="kills me bruh pls dont", description="bruh pls bruh i dont wanna die bruh\nto kill me you have to use my pid found in the `idontwannadie` file or printed out when i was born\nnot for normies")
 async def kys(context, *args):
@@ -92,13 +107,14 @@ async def kys(context, *args):
         return
     password = args[0]
     if password == str(pid):
+        await message.channel.send("im sorry you feel that way bruh")
         print("recieved kill command, sepeku time")
         await bot.close()
 
 @bot.command(brief="returns the integer id for your user bruh", description="returns the integer id for your user bruh, useful for discord debug n shit")
 async def getid(context):
     message = context.message
-    await message.author.send(str(message.author.id))
+    await message.channel.send(str(message.author.id))
 
 @bot.command(brief="search and find up to 25 memes bruh", description="shows the first 25 memes that contain substrings that exactly match bruh")
 async def search(context, *args):
@@ -113,7 +129,7 @@ async def search(context, *args):
     else:
         matches.insert(0, "")
         searchmessage = "\n".join(matches)
-        await message.channel.send("bruh are you lookin for ```" + searchmessage + "```") 
+        await message.channel.send("bruh are you lookin for ```" + searchmessage + "```")
 
 @bot.command(brief="sends you all the memes in a massive DM, dont", description="this will tear into your DMs and send you all the available memes, which is so many memes bro. to actually send all the memes use\n##list memes\nthis is done to prevent your destruction")
 async def list(context, *args):
@@ -134,10 +150,15 @@ async def list(context, *args):
 @bot.command(brief="prints this message bruh", description="bruh dont you have something better to be doin")
 async def help(context, *args):
     message = context.message
-    if not args:
-        pass
-        #print normal help message
-    command = args[0]
+    message.channel.send("to be implemented bruh")
+    #if not args:
+    #    pass
+    #    #print normal help message
+    #    messages = []
+    #    messages.append("available commands:")
+    #    messages.append("`play meme` " + bot.commands.play.brief)
+    #    await message.channel.send("\n".join(messages))
+    #command = args[0]
     #print help message based on command
 #end commands
 
