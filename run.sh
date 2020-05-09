@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 mememachine.py
+python3 mememachine.py 
