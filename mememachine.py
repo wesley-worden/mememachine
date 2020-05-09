@@ -55,7 +55,7 @@ async def on_ready():
 
 #commands
 @bot.command(brief="plays the requested meme bruh", description="will play the meme in muh sounds bruh that exactly matches")
-async def play(self, context, *args):
+async def play(context, *args):
     message = context.message
     if not args:
         await message.channel.send("bruh i need a meme to play")
@@ -85,7 +85,7 @@ async def play(self, context, *args):
     await vc.disconnect
 
 @bot.command(brief="kills me bruh pls dont", description="bruh pls bruh i dont wanna die bruh\nto kill me you have to use my pid found in the `idontwannadie` file or printed out when i was born\nnot for normies")
-async def kys(self, context, *args):
+async def kys(context, *args):
     message = context.message
     if not args:
         await message.channel.send("you think you can kill me? normies cant kill me bruh you gotta use muh pid")
@@ -96,12 +96,12 @@ async def kys(self, context, *args):
         await bot.close()
 
 @bot.command(brief="returns the integer id for your user bruh", description="returns the integer id for your user bruh, useful for discord debug n shit")
-async def getid(self, context):
+async def getid(context):
     message = context.message
     await message.author.send(str(message.author.id))
 
 @bot.command(brief="search and find up to 25 memes bruh", description="shows the first 25 memes that contain substrings that exactly match bruh")
-async def search(self, context, *args):
+async def search(context, *args):
     message = context.message
     if not args:
         await context.channel.send("try using a search term bruh")
@@ -116,25 +116,23 @@ async def search(self, context, *args):
         await message.channel.send("bruh are you lookin for ```" + searchmessage + "```") 
 
 @bot.command(brief="sends you all the memes in a massive DM, dont", description="this will tear into your DMs and send you all the available memes, which is so many memes bro. to actually send all the memes use\n##list memes\nthis is done to prevent your destruction")
-async def list(self, context, *args):
+async def list(context, *args):
     message = context.message
-    if not args:
-        if not args[0] == "memes":
-            await message.channel.send("bruh i am so full of memes, if you are sure you want this use `##list memes`")
-            return
-    elif(password == "memes"):
-        await message.author.send("here are the available memes:")
-        memefiles = getmemefiles()
-        #split into chunks
-        chunksize = 50
-        chunks = [memefiles[i:i + chunksize] for i in range(0, len(memefiles), chunksize)]
-        for memefileschunk in chunks:
-            mememessage = "\n".join(memefileschunk)
-            await message.author.send(mememessage)
-        await message.channel.send("you will not survive")
+    if not args or args[0] != "memes":
+        await message.channel.send("bruh i am so full of memes, if you are sure you want this use `##list memes`")
+        return
+    await message.author.send("here are the available memes:")
+    memefiles = getmemefiles()
+    #split into chunks
+    chunksize = 50
+    chunks = [memefiles[i:i + chunksize] for i in range(0, len(memefiles), chunksize)]
+    for memefileschunk in chunks:
+        mememessage = "\n".join(memefileschunk)
+        await message.author.send(mememessage)
+    await message.channel.send("you will not survive")
 
 @bot.command(brief="prints this message bruh", description="bruh dont you have something better to be doin")
-async def help(self, context, *args):
+async def help(context, *args):
     message = context.message
     if not args:
         pass
