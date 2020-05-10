@@ -275,13 +275,15 @@ async def gif(context, *args):
     request = "https://api.giphy.com/v1/gifs/search?api_key=" + giphy_key + "&q=" + query_url + "&limit=1&offset=0&rating=R&lang=en"
     response = await session.get(request)
     data = json.loads(await response.text())
-    url = data['data'][0]['embed_url']
+    url = data['data'][0]['images']['original']['url']
     #print(message.channel.id)
     memechannel = message.channel
     if type(memechannel) is discord.DMChannel:
         memechannel = bot.get_channel(wednesday_channel)
     await memechannel.send("`" + query + "`")
-    await memechannel.send(url)
+    embed = discord.Embed()
+    embed.set_image(url=url)
+    await memechannel.send(embed=embed)
 
 @bot.command(brief="kills me bruh pls dont", description="bruh pls bruh i dont wanna die bruh\nto kill me you have to use my pid found in the `idontwannadie` file or printed out when i was born\nnot for normies")
 async def kys(context, *args):
@@ -308,7 +310,8 @@ async def shreksmite(context, *args):
     for arg in args[1:]:
         password = password + arg
     if password == shreks_holy_code:
-        await message.channel.send(getrandomshrekimage())
+        embed = discord.Embed.set_image(url=getrandomshrekimage())
+        await message.channel.send(embed=embed)
         await message.channel.send("**its all ogre now**\n_*dies*_")
         print("recieved kill command, sepeku time")
         session.close()
