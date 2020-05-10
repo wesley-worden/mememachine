@@ -40,9 +40,18 @@ shrek_images = [ "http://churchofshrek.yolasite.com/resources/417930_24058019941
         "https://cdn.drawception.com/images/panels/2016/8-12/FMSKyT3j6O-2.png",
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTG5-FXMKGyVzf6TJyCXrl4PQ35S6YSbAQcRoEt2QaMNdTAWqiV&s",
         "https://pbs.twimg.com/media/CxUhUibUcAAV-tQ.jpg",
+        "https://scontent-ort2-2.xx.fbcdn.net/v/t31.0-1/c199.0.603.603a/11061196_1618769351668011_1682580660501647047_o.png?_nc_cat=107&_nc_sid=dbb9e7&_nc_ohc=72NgzAxi0noAX_2NML3&_nc_ht=scontent-ort2-2.xx&oh=5b993ded6a61c5f1586b5d5af21cc941&oe=5EDE6787",
+        "https://i.redd.it/mtn96jh4ygr01.png",
         "https://i.chzbgr.com/full/9125133824/h1CBCE60B/funny-meme-about-shrek-and-worshiping-him" ]
 shrek_words = [ "shrek", "love", "life", "donkey", "swamp", "god", "healer", "holy", "worship", "soul", "light",
-        "redemption", "righteous" ] 
+        "redemption", "righteous" ]
+meme_commands = {
+        "help" : {
+            "brief" : "prints this message bruh",
+            "description" : "dont you have something better to be doing bruh"
+            }
+        }
+
 
 #get giphy key
 giphy_key_file = open("giphy-key", "r")
@@ -63,6 +72,15 @@ shreks_holy_code = "".join(shrek_words[:4])
 print("\n our holy god answers: " + shreks_holy_code)
 
 #helper functions
+def add_command(command_name, brief, description):
+    meme_commands[command_name] = { "brief" : brief, "description" : description }
+
+def get_command_brief(command_name):
+    return meme_commands[command_name]["brief"]
+
+def get_command_description(command_name):
+    return meme_commands[command_name]["description"]
+
 def getrandomshrekimage():
     return random.choice(shrek_images)
 
@@ -232,7 +250,8 @@ async def play(context, *args):
         await voice.move_to(channel)
     else:
         voice = await channel.connect()
-    print("playing " + memepath)
+    print("playing " + memepath + " bruh")
+    await message.channel.send("playing `" + meme + "`")
     #endsig = False
 #    def my_after(error):
 #        coro = message.channel.send("`" + meme + "` is over bruh")
@@ -310,7 +329,7 @@ async def shreksmite(context, *args):
     for arg in args[1:]:
         password = password + arg
     if password == shreks_holy_code:
-        embed = discord.Embed.set_image(url=getrandomshrekimage())
+        embed = discord.Embed().set_image(url=getrandomshrekimage())
         await message.channel.send(embed=embed)
         await message.channel.send("**its all ogre now**\n_*dies*_")
         print("recieved kill command, sepeku time")
@@ -344,24 +363,24 @@ async def search(context, *args):
     if not args:
         await context.channel.send("try using a search term bruh")
         return
-    query = args[0]
-    matches = findmemes(query, 500)
+    #matches = []
+    #for query in args:
+    #    matches.append(findmemes(query, 500))
+    matches = findmemes(args[0], 500)
     matches.sort()
     if(matches == []):
         await message.channel.send("no sounds bruh")
-    else:
-        #matches.insert(0, "")
-        #searchmessage = "\n".join(matches)
-        #await message.channel.send("bruh are you lookin for ```" + searchmessage + "```")
-        await message.channel.send("bruh are you lookin for")
-        chunksize = 50
-        chunks = [matches[i:i + chunksize] for i in range(0, len(matches), chunksize)]
-        for matcheschunk in chunks:
-            for string in matcheschunk:
-                string.prepend("`")
-                string.append("`")
-            mememessage = "\n".join(matcheschunk)
-            await message.channel.send(mememessage)
+        return
+    #matches.insert(0, "")
+    #searchmessage = "\n".join(matches)
+    #await message.channel.send("bruh are you lookin for ```" + searchmessage + "```")
+    await message.channel.send("bruh are you lookin for")
+    chunksize = 50
+    chunks = [matches[i:i + chunksize] for i in range(0, len(matches), chunksize)]
+    for matcheschunk in chunks:
+        mememessage = "\n".join(matcheschunk)
+        mememessage = "`" + mememessage + "`"
+        await message.channel.send(mememessage)
 
 @bot.command(brief="sends you all the memes in a massive DM, dont", description="this will tear into your DMs and send you all the available memes, which is so many memes bro. to actually send all the memes use\n##list memes\nthis is done to prevent your destruction")
 async def list(context, *args):
@@ -379,19 +398,22 @@ async def list(context, *args):
         mememessage = "\n".join(memefileschunk)
         await message.author.send(mememessage)
 
-@bot.command(brief="prints this message bruh", description="bruh dont you have something better to be doin")
+add_command("help", brief="prints this message bruh", description="bruh dont you have something better to be doin")
+@bot.command()
 async def help(context, *args):
     message = context.message
-    message.channel.send("to be implemented bruh")
+    await message.channel.send("not yet bruh sorry")
     #if not args:
     #    pass
     #    #print normal help message
     #    messages = []
     #    messages.append("available commands:")
-    #    messages.append("`play meme` " + bot.commands.play.brief)
+    #    messages.append("`list <code>` sends you all the memes in a massive DM"
     #    await message.channel.send("\n".join(messages))
     #command = args[0]
-    #print help message based on command
+    ##print help message based on command
+    #if command == "list":
+    #    pass
 #end commands
 
 @bot.event
@@ -405,7 +427,11 @@ async def on_message(message):
 
     #other cheeky sayings
     if "weed" in message.content or "420" in message.content:
-        await message.channel.send("ayy weed lmao")
+        await message.channel.send("dude ayy weed lmao")
+    if "suh" in message.content and not message.content.startswith("##gif"):
+        embed = discord.Embed().set_image(url="https://zippy.gfycat.com/AggressiveRadiantGnatcatcher.gif")
+        await message.channel.send("**a**_suh_ dude")
+        await message.channel.send(embed=embed)
     #process commands
     await bot.process_commands(message)
 
