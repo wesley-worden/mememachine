@@ -1,3 +1,6 @@
+import pdb
+print("press c and then enter if the next line runs just fine")
+pdb.set_trace()
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
@@ -5,6 +8,10 @@ from discord import FFmpegPCMAudio
 from discord.utils import get
 import os
 import glob
+import aiohttp
+import json
+#import giphy_client
+#from giphy_client.rest import ApiException
 #import signal
 #import sys
 
@@ -15,9 +22,22 @@ import glob
 #    print("damn bruh giving me the hard Ctrl+C")
 #    sys.exit(0)
 #signal.signal(signal.SIGINT, shrek_wrangler)
+
 #commonly used values
 prefix = "##"
 #status = "potatoe.exe"
+
+#global shit
+playing = False
+endsig = False
+
+#get giphy key
+giphy_key_file = open("giphy-key", "r")
+giphy_key = giphy_key_file.readline()
+giphy_key = giphy_key.rstrip('\r\n')
+giphy_key_file.close()
+#giphy_api_instance = giphy_client.DefaultApi()
+session = aiohttp.ClientSession()
 
 #helper functions
 def getapikey():
@@ -25,6 +45,7 @@ def getapikey():
     api_key = api_key_file.readline()
     api_key_file.close()
     return api_key
+
 
 def findmemes(query, numresults):
     memefiles = getmemefiles()
@@ -67,6 +88,8 @@ async def on_ready():
 #commands
 @bot.command(brief="plays the requested meme bruh", description="will play the meme in muh sounds bruh that exactly matches")
 async def play(context, *args):
+    global playing
+    global endsig
     message = context.message
     if not args:
         await message.channel.send("bruh i need a meme to play")
@@ -88,6 +111,9 @@ async def play(context, *args):
         return
     memepath = "/home/pepesilvia/mememachine/muh_sounds_bruh/" + meme + ".flac"
     #await message.channel.send("i wanna play " + memepath)
+    if(playing == True):
+        endsig = True
+    #done playing other memes
     #switch voice channels if needed
     voice = get(bot.voice_clients, guild=context.guild)
     if voice and voice.is_connected():
@@ -95,9 +121,31 @@ async def play(context, *args):
     else:
         voice = await channel.connect()
     print("playing " + memepath)
+    endsig = False
+    playing = True
     source = FFmpegPCMAudio(memepath)
     player = voice.play(source)
+    while voice.is_playing() == True:
+        if endsig:
+            player.stop()
+            endsig = False
     #disconnect when done
+    #await voice.disconnect()
+
+@bot.command()
+async def gif(context, *args):
+    message = context.message
+    if not args:
+        await message.channel.send("i _wont_ gif empty strings bruh")
+        return
+    query = args[0]
+    for arg in args[1:]:
+        query = query + "%20" + arg
+    request = "https://api.giphy.com/v1/gifs/search?api_key=" + giphy_key + "&q=" + query + "&limit=1&offset=0&rating=R&lang=en"
+    response = await session.get(request)
+    data = json.loads(await response.text())
+    url = data['data'][0]['embed_url']
+    await message.channel.send(url)
 
 @bot.command(brief="kills me bruh pls dont", description="bruh pls bruh i dont wanna die bruh\nto kill me you have to use my pid found in the `idontwannadie` file or printed out when i was born\nnot for normies")
 async def kys(context, *args):
