@@ -112,7 +112,13 @@ async def play(context, *args):
     memepath = "/home/pepesilvia/mememachine/muh_sounds_bruh/" + meme + ".flac"
     #await message.channel.send("i wanna play " + memepath)
     if(playing == True):
+        print("blocking, sending endsig")
         endsig = True
+    while(playing == True):
+        print("waiting...")
+        pass
+    print("done/no more waiting...")
+    endsig = True
     #done playing other memes
     #switch voice channels if needed
     voice = get(bot.voice_clients, guild=context.guild)
@@ -126,9 +132,12 @@ async def play(context, *args):
     source = FFmpegPCMAudio(memepath)
     player = voice.play(source)
     while voice.is_playing() == True:
-        if endsig:
+        if endsig == True:
             player.stop()
+            print("stopped")
             endsig = False
+            playing = False
+    playing = False
     #disconnect when done
     #await voice.disconnect()
 
@@ -149,14 +158,16 @@ async def gif(context, *args):
 
 @bot.command(brief="kills me bruh pls dont", description="bruh pls bruh i dont wanna die bruh\nto kill me you have to use my pid found in the `idontwannadie` file or printed out when i was born\nnot for normies")
 async def kys(context, *args):
+    global session
     message = context.message
     if not args:
         await message.channel.send("you think you can kill me? normies cant kill me bruh you gotta use muh pid")
         return
     password = args[0]
     if password == str(pid):
-        await message.channel.send("im sorry you feel that way bruh")
+        await message.channel.send("im sorry you feel that way bruh\n_*dies*_")
         print("recieved kill command, sepeku time")
+        session.close()
         await bot.close()
 
 @bot.command(brief="returns the integer id for your user bruh", description="returns the integer id for your user bruh, useful for discord debug n shit")
